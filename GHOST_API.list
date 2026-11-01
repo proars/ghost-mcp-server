@@ -1,0 +1,649 @@
+GHOST ADMIN API — ROUTE CATALOG
+Snapshot of the official main branch: 45498ed2eca0585e3542c852e57b275581a78d63
+Updated: 2026-11-01
+
+Scope: 253 canonical Admin API routes in 54 groups from this pinned Ghost commit.
+Includes internal and experimental routes; availability depends on version, role and feature flags.
+This is a route inventory, not a complete payload schema. Usage and safety: README.md.
+
+Sources:
+  Docs: https://docs.ghost.org/admin-api
+  Docs index: https://docs.ghost.org/llms.txt
+  R: https://github.com/TryGhost/Ghost/blob/45498ed2eca0585e3542c852e57b275581a78d63/ghost/core/server/web/api/endpoints/admin/routes.js
+  Permissions: https://github.com/TryGhost/Ghost/blob/45498ed2eca0585e3542c852e57b275581a78d63/ghost/core/server/web/api/endpoints/admin/middleware.js
+
+Legend:
+  [doc] explicit method/path in public docs; [src] confirmed in source, not explicitly documented.
+  [I] passes the integration-token allowlist; handler permissions and other checks still apply.
+  [U] staff token or user session required; integration tokens blocked.
+  [SESSION] user cookie session required; staff and integration tokens blocked.
+  [FLOW] login/recovery/setup with special authentication; [PUBLIC] unauthenticated site info.
+  R:N = line N in source R; handler = Ghost API handler; MCP=name = dedicated tool, MCP=no = none.
+  flag = router feature gate; upload = multipart file fields; token-url = URL-token auth middleware.
+  These labels do not replace handler validation or indicate that session flows are implemented here.
+
+Paths: prepend /ghost/api to catalog paths. For ghost_api_request, omit the /admin prefix.
+
+COMPLETE ROUTE CATALOG
+
+01. SITE — basic site information (routes: 1)
+GET    /admin/site/  [doc] [PUBLIC] — get site title, description, logo, URL, and version
+  handler=site.read; R:20; MCP=get_site
+
+02. CONFIG — Admin configuration (routes: 2)
+GET    /admin/config/  [src] [I] — get record
+  handler=config.read; R:23; MCP=no
+GET    /admin/config/featurebase/  [src] [I] — get Featurebase configuration
+  handler=config.featurebase; R:24; MCP=no
+
+03. POSTS — posts, bulk operations, import, and gift links (routes: 14)
+GET    /admin/posts/  [doc] [I] — list records
+  handler=posts.browse; R:27; MCP=get_posts
+GET    /admin/posts/export/  [src] [I] — export CSV
+  handler=posts.exportCSV; R:28; MCP=no
+POST   /admin/posts/  [doc] [I] — create record
+  handler=posts.add; R:30; MCP=create_post
+DELETE /admin/posts/  [src] [I] — bulk delete records
+  handler=posts.bulkDestroy; R:31; MCP=no
+PUT    /admin/posts/bulk/  [src] [I] — bulk update records
+  handler=posts.bulkEdit; R:32; MCP=no
+POST   /admin/posts/upload/  [src] [I] — import CSV
+  handler=posts.importCSV; R:33; MCP=no; flag=csvContentImporter; upload=postsfile
+GET    /admin/posts/{id}/  [doc] [I] — get record
+  handler=posts.read; R:41; MCP=get_post
+GET    /admin/posts/slug/{slug}/  [doc] [I] — get record
+  handler=posts.read; R:42; MCP=get_post_by_slug
+PUT    /admin/posts/{id}/  [doc] [I] — update record
+  handler=posts.edit; R:43; MCP=update_post
+DELETE /admin/posts/{id}/  [doc] [I] — delete record
+  handler=posts.destroy; R:44; MCP=delete_post
+POST   /admin/posts/{id}/copy/  [src] [I] — copy record
+  handler=posts.copy; R:45; MCP=copy_post
+GET    /admin/posts/{id}/gift_links/  [src] [I] — list records
+  handler=giftLinks.browse; R:72; MCP=no
+PUT    /admin/posts/{id}/gift_links/  [src] [I] — ensure a gift link exists
+  handler=giftLinks.ensure; R:73; MCP=no
+POST   /admin/posts/{id}/gift_links/  [src] [I] — create gift link
+  handler=giftLinks.create; R:74; MCP=no
+
+04. MENTIONS — mentions (routes: 1)
+GET    /admin/mentions/  [src] [U] — list records
+  handler=mentions.browse; R:47; MCP=no
+
+05. COMMENTS — comments, replies, reports, and reactions (routes: 9)
+GET    /admin/comments/  [src] [I] — get all comments
+  handler=comments.browseAll; R:50; MCP=no
+GET    /admin/comments/{id}/  [src] [I] — get comment thread
+  handler=commentReplies.read; R:51; MCP=no
+GET    /admin/comments/{id}/replies/  [src] [I] — list records
+  handler=commentReplies.browse; R:52; MCP=no
+GET    /admin/comments/{id}/reports/  [src] [I] — list records
+  handler=commentReports.browse; R:53; MCP=no
+GET    /admin/comments/{id}/likes/  [src] [I] — list records
+  handler=commentLikes.browse; R:54; MCP=no
+GET    /admin/comments/{id}/dislikes/  [src] [I] — list records
+  handler=commentDislikes.browse; R:55; MCP=no
+GET    /admin/comments/post/{post_id}/  [src] [I] — list records
+  handler=comments.browse; R:56; MCP=no
+POST   /admin/comments/  [src] [I] — create record
+  handler=comments.add; R:57; MCP=no
+PUT    /admin/comments/{id}/  [src] [I] — update record
+  handler=comments.edit; R:58; MCP=no
+
+06. PAGES — pages, bulk operations, and gift links (routes: 12)
+GET    /admin/pages/  [doc] [I] — list records
+  handler=pages.browse; R:61; MCP=get_pages
+DELETE /admin/pages/  [src] [I] — bulk delete records
+  handler=pages.bulkDestroy; R:62; MCP=no
+PUT    /admin/pages/bulk/  [src] [I] — bulk update records
+  handler=pages.bulkEdit; R:63; MCP=no
+POST   /admin/pages/  [doc] [I] — create record
+  handler=pages.add; R:64; MCP=create_page
+GET    /admin/pages/{id}/  [doc] [I] — get record
+  handler=pages.read; R:65; MCP=get_page
+GET    /admin/pages/slug/{slug}/  [doc] [I] — get record
+  handler=pages.read; R:66; MCP=get_page_by_slug
+PUT    /admin/pages/{id}/  [doc] [I] — update record
+  handler=pages.edit; R:67; MCP=update_page
+DELETE /admin/pages/{id}/  [doc] [I] — delete record
+  handler=pages.destroy; R:68; MCP=delete_page
+POST   /admin/pages/{id}/copy/  [doc] [I] — copy record
+  handler=pages.copy; R:69; MCP=copy_page
+GET    /admin/pages/{id}/gift_links/  [src] [I] — list records
+  handler=giftLinks.browse; R:75; MCP=no
+PUT    /admin/pages/{id}/gift_links/  [src] [I] — ensure a gift link exists
+  handler=giftLinks.ensure; R:76; MCP=no
+POST   /admin/pages/{id}/gift_links/  [src] [I] — create gift link
+  handler=giftLinks.create; R:77; MCP=no
+
+07. GIFT LINKS — revoke gift links (routes: 1)
+PUT    /admin/gift_links/remove_all/  [src] [U] — revoke all gift links
+  handler=giftLinks.removeAll; R:78; MCP=no
+
+08. INTEGRATIONS — integrations and their keys (routes: 6)
+GET    /admin/integrations/  [src] [U] — list records
+  handler=integrations.browse; R:82; MCP=no
+GET    /admin/integrations/{id}/  [src] [U] — get record
+  handler=integrations.read; R:83; MCP=no
+POST   /admin/integrations/  [src] [U] — create record
+  handler=integrations.add; R:84; MCP=no
+POST   /admin/integrations/{id}/api_key/{keyid}/refresh/  [src] [U] — refresh integration key
+  handler=integrations.edit; R:85; MCP=no
+PUT    /admin/integrations/{id}/  [src] [U] — update record
+  handler=integrations.edit; R:90; MCP=no
+DELETE /admin/integrations/{id}/  [src] [U] — delete record
+  handler=integrations.destroy; R:91; MCP=no
+
+09. SCHEDULES — scheduled publishing (routes: 1)
+PUT    /admin/schedules/{resource}/{id}/  [src] [I] — execute scheduled publication
+  handler=schedules.publish; R:94; MCP=no; token-url
+
+10. GIFTS — gift delivery and reminders (routes: 2)
+PUT    /admin/gifts/flush_reminders/  [src] [I] — process pending gift reminders
+  handler=gifts.flushReminders; R:97; MCP=no; token-url
+PUT    /admin/gifts/flush_deliveries/  [src] [I] — process pending gift deliveries
+  handler=gifts.flushDeliveries; R:98; MCP=no; token-url
+
+11. SETTINGS — settings, routes, and Stripe Connect (routes: 7)
+GET    /admin/settings/routes/yaml/  [src] [I] — download file
+  handler=settings.download; R:101; MCP=no
+POST   /admin/settings/routes/yaml/  [src] [U] — upload file
+  handler=settings.upload; R:102; MCP=no; upload=routes
+GET    /admin/settings/  [src] [I] — list records
+  handler=settings.browse; R:110; MCP=get_settings
+PUT    /admin/settings/  [src] [U] — update record
+  handler=settings.edit; R:111; MCP=no
+POST   /admin/settings/access_code/regenerate/  [src] [U] — regenerate access code
+  handler=settings.regenerateAccessCode; R:112; MCP=no
+PUT    /admin/settings/verifications/  [src] [U] — confirm settings change
+  handler=settings.verifyKeyUpdate; R:117; MCP=no
+DELETE /admin/settings/stripe/connect/  [src] [U] — disconnect Stripe Connect
+  handler=settings.disconnectStripeConnectIntegration; R:118; MCP=no
+
+12. USERS — staff, passwords, tokens, and owner (routes: 10)
+GET    /admin/users/  [doc] [I] — list records
+  handler=users.browse; R:125; MCP=get_users
+GET    /admin/users/{id}/  [src] [I] — get record
+  handler=users.read; R:126; MCP=get_user
+GET    /admin/users/slug/{slug}/  [src] [I] — get record
+  handler=users.read; R:127; MCP=no
+GET    /admin/users/email/{email}/  [src] [I] — get record
+  handler=users.read; R:129; MCP=no
+GET    /admin/users/{id}/token/  [src] [I] — get staff token
+  handler=users.readStaffToken; R:130; MCP=no
+PUT    /admin/users/password/  [src] [U] — change password
+  handler=users.changePassword; R:132; MCP=no
+PUT    /admin/users/owner/  [src] [SESSION] — transfer site ownership
+  handler=users.transferOwnership; R:133; MCP=no
+PUT    /admin/users/{id}/  [doc] [U] — update record
+  handler=users.edit; R:134; MCP=update_user
+PUT    /admin/users/{id}/token/  [src] [U] — regenerate staff token
+  handler=users.regenerateStaffToken; R:135; MCP=no
+DELETE /admin/users/{id}/  [doc] [U] — delete record
+  handler=users.destroy; R:136; MCP=delete_user
+
+13. TAGS — content tags (routes: 6)
+GET    /admin/tags/  [src] [I] — list records
+  handler=tags.browse; R:139; MCP=get_tags
+GET    /admin/tags/{id}/  [src] [I] — get record
+  handler=tags.read; R:140; MCP=get_tag
+GET    /admin/tags/slug/{slug}/  [src] [I] — get record
+  handler=tags.read; R:141; MCP=get_tag_by_slug
+POST   /admin/tags/  [src] [I] — create record
+  handler=tags.add; R:142; MCP=create_tag
+PUT    /admin/tags/{id}/  [src] [I] — update record
+  handler=tags.edit; R:143; MCP=update_tag
+DELETE /admin/tags/{id}/  [src] [I] — delete record
+  handler=tags.destroy; R:144; MCP=delete_tag
+
+14. TIERS — subscription tiers (routes: 4)
+GET    /admin/tiers/  [doc] [I] — list records
+  handler=tiers.browse; R:147; MCP=get_tiers
+POST   /admin/tiers/  [doc] [I] — create record
+  handler=tiers.add; R:148; MCP=create_tier
+GET    /admin/tiers/{id}/  [src] [I] — get record
+  handler=tiers.read; R:149; MCP=get_tier
+PUT    /admin/tiers/{id}/  [doc] [I] — update record
+  handler=tiers.edit; R:150; MCP=update_tier
+
+15. STRIPE CHECKOUT — checkout settings and preview (routes: 4)
+GET    /admin/stripe/checkout/config/  [src] [U] — get record
+  handler=stripeCheckoutConfig.read; R:153; MCP=no; flag=stripeCheckoutDesign
+PUT    /admin/stripe/checkout/config/  [src] [U] — update record
+  handler=stripeCheckoutConfig.edit; R:159; MCP=no; flag=stripeCheckoutDesign
+POST   /admin/stripe/checkout/preview/  [src] [U] — create record
+  handler=stripeCheckoutPreview.add; R:165; MCP=no; flag=stripeCheckoutDesign
+GET    /admin/stripe/checkout/branding/  [src] [U] — get record
+  handler=stripeCheckoutBranding.read; R:171; MCP=no; flag=stripeCheckoutDesign
+
+16. MEMBERS — members, subscriptions, import, and custom-field definitions (routes: 26)
+GET    /admin/members/  [doc] [I] — list records
+  handler=members.browse; R:179; MCP=get_members
+POST   /admin/members/  [doc] [I] — create record
+  handler=members.add; R:180; MCP=create_member
+DELETE /admin/members/  [src] [I] — bulk delete records
+  handler=members.bulkDestroy; R:181; MCP=no
+PUT    /admin/members/bulk/  [src] [I] — bulk update records
+  handler=members.bulkEdit; R:182; MCP=no
+GET    /admin/members/stats/count/  [src] [I] — get member count stats
+  handler=members.memberStats; R:189; MCP=no
+GET    /admin/members/stats/mrr/  [src] [I] — get monthly recurring revenue stats
+  handler=members.mrrStats; R:190; MCP=no
+GET    /admin/members/events/  [src] [I] — get member activity feed
+  handler=members.activityFeed; R:192; MCP=no
+GET    /admin/members/upload/  [src] [I] — export CSV
+  handler=members.exportCSV; R:194; MCP=no
+POST   /admin/members/upload/  [src] [I] — import CSV
+  handler=members.importCSV; R:195; MCP=no; upload=membersfile
+GET    /admin/members/stripe_connect/  [src] [I] — start Stripe Connect authorization
+  handler=membersStripeConnect.auth; R:203; MCP=no
+GET    /admin/members/metafields/{namespace}/  [src] [I] — list records
+  handler=membersMetafields.browse; R:226; MCP=no
+GET    /admin/members/metafields/{namespace}/{key}/  [src] [I] — get record
+  handler=membersMetafields.read; R:227; MCP=no
+POST   /admin/members/metafields/{namespace}/  [src] [I] — create record
+  handler=membersMetafields.add; R:234; MCP=no; flag=membersCustomFields
+PUT    /admin/members/metafields/{namespace}/  [src] [I] — reorder field definitions
+  handler=membersMetafields.reorder; R:235; MCP=no; flag=membersCustomFields
+PUT    /admin/members/metafields/{namespace}/{key}/  [src] [I] — update record
+  handler=membersMetafields.edit; R:236; MCP=no; flag=membersCustomFields
+DELETE /admin/members/metafields/{namespace}/{key}/  [src] [I] — delete record
+  handler=membersMetafields.destroy; R:237; MCP=no; flag=membersCustomFields
+GET    /admin/members/{id}/  [src] [I] — get record
+  handler=members.read; R:258; MCP=get_member
+PUT    /admin/members/{id}/  [doc] [I] — update record
+  handler=members.edit; R:259; MCP=update_member
+DELETE /admin/members/{id}/  [src] [I] — delete record
+  handler=members.destroy; R:260; MCP=delete_member
+DELETE /admin/members/{id}/sessions/  [src] [I] — end member sessions
+  handler=members.logout; R:261; MCP=no
+DELETE /admin/members/{id}/suppression/  [src] [I] — clear email suppression
+  handler=members.deleteEmailSuppression; R:262; MCP=no
+POST   /admin/members/{id}/subscriptions/  [src] [I] — create member subscription
+  handler=members.createSubscription; R:268; MCP=no
+PUT    /admin/members/{id}/subscriptions/{subscription_id}/  [src] [I] — update member subscription
+  handler=members.editSubscription; R:269; MCP=no
+GET    /admin/members/{id}/signin_urls/  [src] [I] — get member login links
+  handler=memberSigninUrls.read; R:275; MCP=no
+POST   /admin/members/{id}/commenting/disable/  [src] [I] — disable comments
+  handler=memberCommenting.disable; R:277; MCP=no
+POST   /admin/members/{id}/commenting/enable/  [src] [I] — enable comments
+  handler=memberCommenting.enable; R:282; MCP=no
+
+17. OFFERS — offers and discounts (routes: 4)
+GET    /admin/offers/  [doc] [I] — list records
+  handler=offers.browse; R:184; MCP=get_offers
+POST   /admin/offers/  [doc] [I] — create record
+  handler=offers.add; R:185; MCP=create_offer
+GET    /admin/offers/{id}/  [src] [I] — get record
+  handler=offers.read; R:186; MCP=get_offer
+PUT    /admin/offers/{id}/  [doc] [I] — update record
+  handler=offers.edit; R:187; MCP=update_offer
+
+18. APPS — app installations and sessions (routes: 7)
+POST   /admin/apps/installations/preview/  [src] [U] — create record
+  handler=appInstallationPreviews.add; R:250; MCP=no; flag=apps
+GET    /admin/apps/installations/  [src] [U] — list records
+  handler=appInstallations.browse; R:251; MCP=no; flag=apps
+POST   /admin/apps/installations/  [src] [U] — create record
+  handler=appInstallations.add; R:252; MCP=no; flag=apps
+GET    /admin/apps/installations/{id}/  [src] [U] — get record
+  handler=appInstallations.read; R:253; MCP=no; flag=apps
+PUT    /admin/apps/installations/{id}/  [src] [U] — update record
+  handler=appInstallations.edit; R:254; MCP=no; flag=apps
+POST   /admin/apps/installations/{id}/sessions/  [src] [U] — start app session
+  handler=appSessions.start; R:255; MCP=no; flag=apps
+DELETE /admin/apps/installations/{id}/  [src] [U] — delete record
+  handler=appInstallations.destroy; R:256; MCP=no; flag=apps
+
+19. STATS — content, member, and revenue statistics (routes: 17)
+GET    /admin/stats/member_count/  [src] [U] — get member-count history
+  handler=stats.memberCountHistory; R:285; MCP=no
+GET    /admin/stats/mrr/  [src] [U] — get MRR trends
+  handler=stats.mrr; R:286; MCP=no
+GET    /admin/stats/subscriptions/  [src] [U] — get subscription stats
+  handler=stats.subscriptions; R:287; MCP=no
+GET    /admin/stats/referrers/  [src] [U] — get referral-source history
+  handler=stats.referrersHistory; R:288; MCP=no
+GET    /admin/stats/posts/{id}/stats/  [src] [U] — get post stats
+  handler=stats.postStats; R:289; MCP=no
+GET    /admin/stats/top-posts/  [src] [U] — get popular posts
+  handler=stats.topPosts; R:290; MCP=no
+GET    /admin/stats/top-posts-views/  [src] [U] — get popular posts by views
+  handler=stats.topPostsViews; R:291; MCP=no
+GET    /admin/stats/top-content/  [src] [U] — get popular content
+  handler=stats.topContent; R:292; MCP=no
+GET    /admin/stats/newsletter-stats/  [src] [U] — get newsletter stats
+  handler=stats.newsletterStats; R:293; MCP=no
+GET    /admin/stats/newsletter-basic-stats/  [src] [U] — get newsletter overview metrics
+  handler=stats.newsletterBasicStats; R:294; MCP=no
+GET    /admin/stats/newsletter-click-stats/  [src] [U] — get newsletter click stats
+  handler=stats.newsletterClickStats; R:299; MCP=no
+GET    /admin/stats/subscriber-count/  [src] [U] — get newsletter subscriber count
+  handler=stats.subscriberCount; R:304; MCP=no
+GET    /admin/stats/posts/{id}/top-referrers/  [src] [U] — get post referral sources
+  handler=stats.postReferrers; R:305; MCP=no
+GET    /admin/stats/posts/{id}/growth/  [src] [U] — get audience growth attributed to a post
+  handler=stats.postGrowthStats; R:306; MCP=no
+GET    /admin/stats/top-sources-growth/  [src] [U] — get audience growth sources
+  handler=stats.topSourcesGrowth; R:307; MCP=no
+POST   /admin/stats/posts-visitor-counts/  [src] [U] — get visitor counts for a set of posts
+  handler=stats.postsVisitorCounts; R:308; MCP=no
+POST   /admin/stats/posts-member-counts/  [src] [U] — get member counts for a set of posts
+  handler=stats.postsMemberCounts; R:309; MCP=no
+
+20. LABELS — member labels (routes: 6)
+GET    /admin/labels/  [doc] [I] — list records
+  handler=labels.browse; R:312; MCP=get_labels
+GET    /admin/labels/{id}/  [src] [I] — get record
+  handler=labels.read; R:313; MCP=no
+GET    /admin/labels/slug/{slug}/  [src] [I] — get record
+  handler=labels.read; R:314; MCP=no
+POST   /admin/labels/  [doc] [I] — create record
+  handler=labels.add; R:315; MCP=create_label
+PUT    /admin/labels/{id}/  [doc] [I] — update record
+  handler=labels.edit; R:316; MCP=update_label
+DELETE /admin/labels/{id}/  [doc] [I] — delete record
+  handler=labels.destroy; R:317; MCP=delete_label
+
+21. AUTOMATIONS — automations, runs, and email previews (routes: 11)
+GET    /admin/automations/  [src] [U] — list records
+  handler=automations.browse; R:320; MCP=no
+GET    /admin/automations/{automation_id}/actions/{action_id}/links/  [src] [U] — list records
+  handler=automationActionLinks.browse; R:321; MCP=no
+GET    /admin/automations/{id}/  [src] [U] — get record
+  handler=automations.read; R:326; MCP=no
+GET    /admin/automations/{id}/performance-stats/  [src] [U] — get record
+  handler=automationPerformanceStats.read; R:327; MCP=no
+GET    /admin/automations/{id}/runs/  [src] [U] — list records
+  handler=automationRuns.browse; R:332; MCP=no
+GET    /admin/automations/{id}/runs/{run_id}/  [src] [U] — get record
+  handler=automationRunHistory.read; R:333; MCP=no
+POST   /admin/automations/{id}/email_preview/  [src] [I] — generate preview
+  handler=automationEmailPreviews.preview; R:334; MCP=no
+POST   /admin/automations/{id}/email_test/  [src] [I] — send a test email
+  handler=automationEmailPreviews.sendTestEmail; R:339; MCP=no
+PUT    /admin/automations/poll/  [src] [I] — run automation processing
+  handler=automations.poll; R:345; MCP=no; token-url
+POST   /admin/automations/  [src] [I] — create record
+  handler=automations.add; R:346; MCP=no
+PUT    /admin/automations/{id}/  [src] [I] — update record
+  handler=automations.edit; R:347; MCP=no
+
+22. AUTOMATED EMAILS — automated emails and design (routes: 10)
+GET    /admin/automated_emails/  [src] [U] — list records
+  handler=automatedEmails.browse; R:350; MCP=no
+GET    /admin/automated_emails/design/  [src] [U] — get record
+  handler=automatedEmailDesign.read; R:351; MCP=no
+PUT    /admin/automated_emails/senders/  [src] [U] — update automated email senders
+  handler=automatedEmails.editSenders; R:352; MCP=no
+PUT    /admin/automated_emails/verifications/  [src] [U] — confirm sender change
+  handler=automatedEmails.verifySenderUpdate; R:353; MCP=no
+GET    /admin/automated_emails/{id}/  [src] [U] — get record
+  handler=automatedEmails.read; R:358; MCP=no
+POST   /admin/automated_emails/  [src] [U] — create record
+  handler=automatedEmails.add; R:359; MCP=no
+PUT    /admin/automated_emails/design/  [src] [U] — update record
+  handler=automatedEmailDesign.edit; R:360; MCP=no
+PUT    /admin/automated_emails/{id}/  [src] [U] — update record
+  handler=automatedEmails.edit; R:361; MCP=no
+POST   /admin/automated_emails/{id}/preview/  [src] [U] — generate preview
+  handler=automatedEmails.preview; R:362; MCP=no
+POST   /admin/automated_emails/{id}/test/  [src] [U] — send a test email
+  handler=automatedEmails.sendTestEmail; R:363; MCP=no
+
+23. ROLES — staff roles (routes: 1)
+GET    /admin/roles/  [doc] [I] — list records
+  handler=roles.browse; R:371; MCP=get_roles
+
+24. SLUGS — unique slug generation (routes: 2)
+GET    /admin/slugs/{type}/{name}/  [src] [U] — generate a unique slug
+  handler=slugs.generate; R:374; MCP=no
+GET    /admin/slugs/{type}/{name}/{id}/  [src] [U] — generate a unique slug
+  handler=slugs.generate; R:375; MCP=no
+
+25. THEMES — themes (routes: 7)
+GET    /admin/themes/  [src] [U] — list records
+  handler=themes.browse; R:378; MCP=no
+GET    /admin/themes/{name}/download/  [src] [U] — download file
+  handler=themes.download; R:380; MCP=no
+GET    /admin/themes/active/  [src] [U] — get active theme
+  handler=themes.readActive; R:382; MCP=no
+POST   /admin/themes/upload/  [doc] [I] — upload file
+  handler=themes.upload; R:384; MCP=upload_theme; upload=file
+POST   /admin/themes/install/  [src] [I] — install theme
+  handler=themes.install; R:392; MCP=no
+PUT    /admin/themes/{name}/activate/  [doc] [I] — activate theme
+  handler=themes.activate; R:394; MCP=activate_theme
+DELETE /admin/themes/{name}/  [src] [U] — delete record
+  handler=themes.destroy; R:396; MCP=no
+
+26. NOTIFICATIONS — Admin notifications (routes: 3)
+GET    /admin/notifications/  [src] [U] — list records
+  handler=notifications.browse; R:399; MCP=no
+POST   /admin/notifications/  [src] [U] — create record
+  handler=notifications.add; R:400; MCP=no
+DELETE /admin/notifications/{notification_id}/  [src] [U] — delete record
+  handler=notifications.destroy; R:401; MCP=no
+
+27. DB — content export, import, and backups (routes: 5)
+GET    /admin/db/  [src] [I] — export content
+  handler=db.exportContent; R:408; MCP=no
+POST   /admin/db/  [src] [I] — import content
+  handler=db.importContent; R:409; MCP=no; upload=importfile
+DELETE /admin/db/  [src] [SESSION] — DELETE ALL CONTENT
+  handler=db.deleteAllContent; R:416; MCP=no
+POST   /admin/db/backup/  [src] [I] — create content backup
+  handler=db.backupContent; R:417; MCP=no
+POST   /admin/db/media/inline/  [src] [I] — process inline media
+  handler=db.inlineMedia; R:419; MCP=no
+
+28. EXPORTS — export jobs and downloading results (routes: 2)
+GET    /admin/exports/download/  [src] [U] — download file
+  handler=exports.download; R:422; MCP=no
+POST   /admin/exports/  [src] [U] — create export job
+  handler=exports.add; R:423; MCP=no
+
+29. SLACK — integration test (routes: 1)
+POST   /admin/slack/test/  [src] [U] — send a Slack test
+  handler=slack.sendTest; R:426; MCP=no
+
+30. SUPPORT REQUESTS — support requests (routes: 1)
+POST   /admin/support_requests/  [src] [U] — create record
+  handler=supportRequests.add; R:429; MCP=no
+
+31. TINYBIRD — analytics token (routes: 1)
+GET    /admin/tinybird/token/  [src] [U] — get service token
+  handler=tinybird.token; R:437; MCP=no
+
+32. FEATUREBASE — feedback-service token (routes: 1)
+GET    /admin/featurebase/token/  [src] [U] — get service token
+  handler=featurebase.token; R:440; MCP=no
+
+33. SESSION — login, logout, and session verification (routes: 4)
+POST   /admin/session/  [doc] [FLOW] — create user session
+  handler=session.add; R:444; MCP=no
+DELETE /admin/session/  [src] [U] — end session
+  handler=session.delete; R:450; MCP=no
+POST   /admin/session/verify/  [doc] [FLOW] — resend verification code
+  handler=session.sendVerification; R:451; MCP=no
+PUT    /admin/session/verify/  [doc] [FLOW] — verify session with code
+  handler=session.verify; R:456; MCP=no
+
+34. IDENTITIES — user identity details (routes: 1)
+GET    /admin/identities/  [src] [U] — get record
+  handler=identities.read; R:459; MCP=no
+
+35. AUTHENTICATION — passwords, invitations, setup, and authentication reset (routes: 8)
+POST   /admin/authentication/password_reset/  [src] [FLOW] — request a password reset
+  handler=authentication.generateResetToken; R:462; MCP=no
+PUT    /admin/authentication/password_reset/  [src] [FLOW] — set password using reset token
+  handler=authentication.resetPassword; R:468; MCP=no
+POST   /admin/authentication/invitation/  [src] [FLOW] — accept invitation
+  handler=authentication.acceptInvitation; R:474; MCP=no
+GET    /admin/authentication/invitation/  [src] [FLOW] — check invitation
+  handler=authentication.isInvitation; R:475; MCP=no
+POST   /admin/authentication/setup/  [src] [FLOW] — perform initial setup
+  handler=authentication.setup; R:476; MCP=no
+PUT    /admin/authentication/setup/  [src] [U] — update settings data
+  handler=authentication.updateSetup; R:477; MCP=no
+GET    /admin/authentication/setup/  [src] [FLOW] — check setup status
+  handler=authentication.isSetup; R:478; MCP=no
+POST   /admin/authentication/reset/  [src] [SESSION] — reset authentication
+  handler=authentication.reset; R:479; MCP=no
+
+36. IMAGES — image upload (routes: 1)
+POST   /admin/images/upload/  [doc] [I] — upload file
+  handler=images.upload; R:482; MCP=upload_image; upload=file
+
+37. MEDIA — media and thumbnail uploads (routes: 2)
+POST   /admin/media/upload/  [src] [I] — upload file
+  handler=media.upload; R:491; MCP=no; upload=file,thumbnail
+PUT    /admin/media/thumbnail/upload/  [src] [U] — upload media thumbnail
+  handler=media.uploadThumbnail; R:498; MCP=no; upload=file
+
+38. FILES — file upload (routes: 1)
+POST   /admin/files/upload/  [src] [I] — upload file
+  handler=files.upload; R:507; MCP=no; upload=file
+
+39. INVITES — staff invitations (routes: 4)
+GET    /admin/invites/  [src] [U] — list records
+  handler=invites.browse; R:516; MCP=no
+GET    /admin/invites/{id}/  [src] [U] — get record
+  handler=invites.read; R:517; MCP=no
+POST   /admin/invites/  [doc] [I] — create record
+  handler=invites.add; R:518; MCP=invite_user
+DELETE /admin/invites/{id}/  [src] [U] — delete record
+  handler=invites.destroy; R:519; MCP=no
+
+40. REDIRECTS — redirect import and export (routes: 2)
+GET    /admin/redirects/download/  [src] [U] — download file
+  handler=redirects.download; R:522; MCP=no
+POST   /admin/redirects/upload/  [src] [U] — upload file
+  handler=redirects.upload; R:523; MCP=no; upload=redirects
+
+41. UPGRADES — host-managed upgrades (routes: 3)
+GET    /admin/upgrades/  [src] [U] — get available hosting updates
+  handler=upgrades.browse; R:532; MCP=no
+POST   /admin/upgrades/  [src] [U] — request a hosting update
+  handler=upgrades.add; R:538; MCP=no
+GET    /admin/upgrades/{id}/  [src] [U] — get update status
+  handler=upgrades.read; R:545; MCP=no
+
+42. WEBHOOKS — outgoing webhooks (routes: 3)
+POST   /admin/webhooks/  [doc] [I] — create record
+  handler=webhooks.add; R:553; MCP=create_webhook
+PUT    /admin/webhooks/{id}/  [doc] [I] — update record
+  handler=webhooks.edit; R:554; MCP=update_webhook
+DELETE /admin/webhooks/{id}/  [doc] [I] — delete record
+  handler=webhooks.destroy; R:555; MCP=delete_webhook
+
+43. OEMBED — external embed data (routes: 1)
+GET    /admin/oembed/  [src] [I] — get record
+  handler=oembed.read; R:558; MCP=no
+
+44. ACTIONS — activity log (routes: 1)
+GET    /admin/actions/  [src] [I] — list records
+  handler=actions.browse; R:561; MCP=no
+
+45. EMAIL PREVIEWS — post preview and test send (routes: 2)
+GET    /admin/email_previews/posts/{id}/  [src] [U] — get record
+  handler=email_previews.read; R:564; MCP=no
+POST   /admin/email_previews/posts/{id}/  [src] [U] — send a test email
+  handler=email_previews.sendTestEmail; R:566; MCP=no
+
+46. EMAILS — sent emails, delivery, and analytics (routes: 9)
+GET    /admin/emails/  [src] [U] — list records
+  handler=emails.browse; R:574; MCP=no
+GET    /admin/emails/{id}/  [src] [U] — get record
+  handler=emails.read; R:575; MCP=no
+GET    /admin/emails/{id}/status/  [src] [U] — get sending status
+  handler=emails.sendingStatus; R:576; MCP=no
+PUT    /admin/emails/{id}/retry/  [src] [U] — retry email delivery
+  handler=emails.retry; R:577; MCP=no
+GET    /admin/emails/{id}/batches/  [src] [U] — get delivery batches
+  handler=emails.browseBatches; R:578; MCP=no
+GET    /admin/emails/{id}/recipient-failures/  [src] [U] — get recipient delivery failures
+  handler=emails.browseFailures; R:579; MCP=no
+GET    /admin/emails/{id}/analytics/  [src] [U] — get analytics collection status
+  handler=emails.analyticsStatus; R:580; MCP=no
+PUT    /admin/emails/{id}/analytics/  [src] [U] — schedule analytics collection
+  handler=emails.scheduleAnalytics; R:581; MCP=no
+DELETE /admin/emails/analytics/  [src] [U] — cancel scheduled analytics collection
+  handler=emails.cancelScheduledAnalytics; R:582; MCP=no
+
+47. SNIPPETS — editor content snippets (routes: 5)
+GET    /admin/snippets/  [src] [U] — list records
+  handler=snippets.browse; R:585; MCP=no
+GET    /admin/snippets/{id}/  [src] [U] — get record
+  handler=snippets.read; R:586; MCP=no
+POST   /admin/snippets/  [src] [U] — create record
+  handler=snippets.add; R:587; MCP=no
+PUT    /admin/snippets/{id}/  [src] [U] — update record
+  handler=snippets.edit; R:588; MCP=no
+DELETE /admin/snippets/{id}/  [src] [U] — delete record
+  handler=snippets.destroy; R:589; MCP=no
+
+48. CUSTOM THEME SETTINGS — custom theme settings (routes: 2)
+GET    /admin/custom_theme_settings/  [src] [U] — list records
+  handler=customThemeSettings.browse; R:592; MCP=no
+PUT    /admin/custom_theme_settings/  [src] [U] — update record
+  handler=customThemeSettings.edit; R:593; MCP=no
+
+49. NEWSLETTERS — newsletters and sender verification (routes: 5)
+GET    /admin/newsletters/  [doc] [I] — list records
+  handler=newsletters.browse; R:595; MCP=get_newsletters
+GET    /admin/newsletters/{id}/  [src] [I] — get record
+  handler=newsletters.read; R:596; MCP=get_newsletter
+POST   /admin/newsletters/  [doc] [I] — create record
+  handler=newsletters.add; R:597; MCP=create_newsletter
+PUT    /admin/newsletters/verifications/  [src] [I] — confirm newsletter property change
+  handler=newsletters.verifyPropertyUpdate; R:598; MCP=no
+PUT    /admin/newsletters/{id}/  [doc] [I] — update record
+  handler=newsletters.edit; R:603; MCP=update_newsletter
+
+50. LINKS — links and bulk editing (routes: 2)
+GET    /admin/links/  [src] [U] — list records
+  handler=links.browse; R:605; MCP=no
+PUT    /admin/links/bulk/  [src] [U] — bulk update records
+  handler=links.bulkEdit; R:606; MCP=no
+
+51. RECOMMENDATIONS — publication recommendations (routes: 6)
+GET    /admin/recommendations/  [src] [U] — list records
+  handler=recommendations.browse; R:609; MCP=no
+GET    /admin/recommendations/{id}/  [src] [U] — get record
+  handler=recommendations.read; R:610; MCP=no
+POST   /admin/recommendations/  [src] [U] — create record
+  handler=recommendations.add; R:611; MCP=no
+POST   /admin/recommendations/check/  [src] [U] — check recommended publication
+  handler=recommendations.check; R:612; MCP=no
+PUT    /admin/recommendations/{id}/  [src] [U] — update record
+  handler=recommendations.edit; R:613; MCP=no
+DELETE /admin/recommendations/{id}/  [src] [U] — delete record
+  handler=recommendations.destroy; R:614; MCP=no
+
+52. INCOMING RECOMMENDATIONS — incoming recommendations (routes: 1)
+GET    /admin/incoming_recommendations/  [src] [U] — list records
+  handler=incomingRecommendations.browse; R:617; MCP=no
+
+53. FEEDBACK — member feedback (routes: 1)
+GET    /admin/feedback/{id}/  [src] [U] — list records
+  handler=feedbackMembers.browse; R:624; MCP=no
+
+54. SEARCH INDEX — search index data (routes: 4)
+GET    /admin/search-index/posts/  [src] [I] — get post stats
+  handler=searchIndex.fetchPosts; R:627; MCP=no
+GET    /admin/search-index/pages/  [src] [I] — get page stats
+  handler=searchIndex.fetchPages; R:628; MCP=no
+GET    /admin/search-index/tags/  [src] [I] — get tag stats
+  handler=searchIndex.fetchTags; R:629; MCP=no
+GET    /admin/search-index/users/  [src] [I] — get author stats
+  handler=searchIndex.fetchUsers; R:630; MCP=no
+
+COVERAGE BY THE CURRENT MCP SERVER
+  55 dedicated API tools + 2 shortcuts + ghost_list_endpoints + ghost_api_request = 59 tools.
+  198 routes have no dedicated tool; the generic caller does not bypass access or implement sessions.
+  Initial access classes: PUBLIC=1, I=124, U=116, SESSION=3, FLOW=9.
+
+Maintenance: edit this file, run npm run catalog, then npm test. See the Development section of README.md.
+SHA-256 of source routes.js: dfc8021611c825e8b8572d676cf38290ca7afc09cd81dc8bad0dbfc6f22c2cb6
