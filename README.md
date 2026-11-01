@@ -22,7 +22,7 @@ You need Node.js 20 or newer and a Ghost site with Admin API access.
   "mcpServers": {
     "ghost": {
       "command": "npx",
-      "args": ["-y", "ghost-mcp-server"],
+      "args": ["-y", "@proars/ghost-mcp-server"],
       "env": {
         "GHOST_API_URL": "https://your-blog.com",
         "GHOST_ADMIN_API_KEY": "64f1a2b3c4d5e6f7a8b9c0d1:3e5f7a9b1c2d4e6f8a0b2c4d6e8f0a1b3c5d7e9f1a2b4c6d8e0f2a3b5c7d9e1f"
@@ -48,10 +48,10 @@ Config file locations: Claude Desktop on macOS uses `~/Library/Application Suppo
 claude mcp add ghost \
   -e GHOST_API_URL=https://your-blog.com \
   -e GHOST_ADMIN_API_KEY=64f1a2b3c4d5e6f7a8b9c0d1:3e5f7a9b1c2d4e6f8a0b2c4d6e8f0a1b3c5d7e9f1a2b4c6d8e0f2a3b5c7d9e1f \
-  -- npx -y ghost-mcp-server
+  -- npx -y @proars/ghost-mcp-server
 ```
 
-Any other stdio MCP client can run the same command, `npx -y ghost-mcp-server`, with the two environment variables.
+Any other stdio MCP client can run the same command, `npx -y @proars/ghost-mcp-server`, with the two environment variables.
 
 ## Install from source
 
