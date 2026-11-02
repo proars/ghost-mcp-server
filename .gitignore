@@ -1,17 +1,10 @@
-# Dependencies and build output
 node_modules/
 dist/
-
-# Secrets
 .env
 .env.*
 !.env.example
-
-# Logs
 *.log
 npm-debug.log*
-
-plan.md
 AGENTS.md
 .DS_Store
 .vscode/

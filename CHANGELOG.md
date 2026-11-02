@@ -4,6 +4,11 @@ All notable changes to this project are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- README: npm version badge.
+- README: JSON `args` example for the update command, and guidance on the API URL for Ghost(Pro) and custom domains.
+
 ## [2.1.1] - 2026-11-01
 
 ### Changed

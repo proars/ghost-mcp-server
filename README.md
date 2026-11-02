@@ -1,6 +1,7 @@
 # Ghost MCP Server: manage Ghost CMS from Claude, Cursor and other AI clients
 
 [![CI](https://github.com/proars/ghost-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/proars/ghost-mcp-server/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@proars/ghost-mcp-server)](https://www.npmjs.com/package/@proars/ghost-mcp-server)
 ![Node.js 20+](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)
 ![Tools](https://img.shields.io/badge/tools-59-blue)
 ![Routes](https://img.shields.io/badge/Admin%20API%20routes-253-orange)
@@ -55,11 +56,18 @@ claude mcp add ghost --scope user \
 
 Check the connection with `claude mcp get ghost`, which should report `Connected`, or type `/mcp` inside a `claude` session. To remove the server, run `claude mcp remove ghost -s user`.
 
-**Updating:** `npx` keeps a cached copy and may not fetch a new release right away. To update, run `rm -rf ~/.npm/_npx` and restart your client, or use `@proars/ghost-mcp-server@latest` in the command so npx checks the registry on every start. To stay on one version, pin it, for example `@proars/ghost-mcp-server@2.1.0`. See the [changelog](CHANGELOG.md) for what changed in each release.
+Any other stdio MCP client can run the same command, `npx -y @proars/ghost-mcp-server`, with the two environment variables.
+
+**Updating:** `npx` uses a cache, so `@latest` may not be checked against the registry on every start. To force a registry freshness check whenever the command runs, use `npx --prefer-online -y @proars/ghost-mcp-server@latest`. In a JSON client configuration, put each part in its own `args` entry:
+
+```json
+"command": "npx",
+"args": ["--prefer-online", "-y", "@proars/ghost-mcp-server@latest"]
+```
+
+To stay on one version, pin it, for example `@proars/ghost-mcp-server@2.1.1`. See the [changelog](CHANGELOG.md) for what changed in each release.
 
 Don't run `npx` from inside a clone of this repository: npm finds the local `package.json` with the same name and fails with `ghost-mcp-server: command not found`. Run it from any other folder.
-
-Any other stdio MCP client can run the same command, `npx -y @proars/ghost-mcp-server`, with the two environment variables.
 
 ## Install from source
 
@@ -109,7 +117,7 @@ The `.env` file in the project root is read regardless of the directory the clie
 
 Ghost has no delete endpoint for tiers, newsletters or offers, so those resources have no `delete_*` tool.
 
-> **Warning: this server exposes every supported function, including destructive ones.** `delete_post`, `delete_page`, `delete_tag`, `delete_member`, `delete_user`, `activate_theme`, `upload_theme` and `ghost_api_request` can permanently remove or overwrite content, subscribers and site settings. Deleted records usually cannot be restored. Create a separate integration key for the server, make a backup (Ghost Admin → Settings → Labs → Export) before bulk work, and turn on manual approval for all `update_*`, `delete_*` and generic calls in your client.
+> **Warning: this server exposes every supported function, including destructive ones.** `delete_post`, `delete_page`, `delete_tag`, `delete_member`, `delete_user`, `activate_theme`, `upload_theme` and `ghost_api_request` can permanently remove or overwrite content, subscribers and site settings. Deleted records usually cannot be restored. Create a separate integration key for the server, export a backup of your content from Ghost Admin before bulk work, and turn on manual approval for all `update_*`, `delete_*` and generic calls in your client.
 
 ### How do I call the tools?
 
@@ -180,7 +188,7 @@ The tests check catalog and tool consistency, request construction, file safety,
 ## FAQ
 
 **Does it work with self-hosted Ghost and Ghost(Pro)?**
-Yes, as long as you can reach the Admin API and have a key. Use the Admin domain of your site as `GHOST_API_URL`.
+Yes, as long as you can reach the Admin API and have a key. Set `GHOST_API_URL` to the API URL shown on your custom integration page in Ghost Admin. This matters most for Ghost(Pro) and for sites behind a custom domain, because the server never follows redirects: an address that redirects to another one will fail.
 
 **Which clients does it support?**
 Any MCP client that can start a stdio server, including Claude Desktop, Claude Code and Cursor.
