@@ -641,7 +641,7 @@ GET    /admin/search-index/users/  [src] [I] — get author stats
   handler=searchIndex.fetchUsers; R:630; MCP=no
 
 COVERAGE BY THE CURRENT MCP SERVER
-  55 dedicated API tools + 2 shortcuts + ghost_list_endpoints + ghost_api_request = 59 tools.
+  55 dedicated API tools + 3 shortcuts + ghost_list_endpoints + ghost_api_request = 60 tools.
   198 routes have no dedicated tool; the generic caller does not bypass access or implement sessions.
   Initial access classes: PUBLIC=1, I=124, U=116, SESSION=3, FLOW=9.
 

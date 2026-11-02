@@ -4,8 +4,11 @@ All notable changes to this project are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-02
+
 ### Added
 
+- `update_page_seo` shortcut, matching `update_post_seo` for pages (`PUT /pages/{id}/`). The server now has 60 tools. README documents it in the tool table and the calling conventions.
 - README: npm version badge and a demo GIF (`docs/demo.gif`).
 - README: JSON `args` example for the update command, and guidance on the API URL for Ghost(Pro) and custom domains.
 

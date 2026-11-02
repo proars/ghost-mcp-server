@@ -3,13 +3,13 @@
 [![CI](https://github.com/proars/ghost-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/proars/ghost-mcp-server/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@proars/ghost-mcp-server)](https://www.npmjs.com/package/@proars/ghost-mcp-server)
 ![Node.js 20+](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)
-![Tools](https://img.shields.io/badge/tools-59-blue)
+![Tools](https://img.shields.io/badge/tools-60-blue)
 ![Routes](https://img.shields.io/badge/Admin%20API%20routes-253-orange)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
 Ghost MCP Server is an open-source [Model Context Protocol](https://modelcontextprotocol.io) server for Ghost CMS, written in TypeScript. It connects an MCP client such as Claude Desktop, Claude Code or Cursor to the Ghost Admin API over stdio. With it, an AI assistant can create and edit posts and pages, set SEO metadata, manage tags, members and newsletters, upload images and themes, and export content.
 
-It exposes **59 tools**: 55 dedicated API tools, two shortcuts for SEO and tags, a route search and a generic request tool. The built-in catalog covers **253 Admin API routes** taken from a pinned Ghost source snapshot. What works on your site depends on your credentials, your Ghost version and its feature flags. Routes and sources are listed in [GHOST_API.list](GHOST_API.list).
+It exposes **60 tools**: 55 dedicated API tools, three shortcuts for SEO and tags, a route search and a generic request tool. The built-in catalog covers **253 Admin API routes** taken from a pinned Ghost source snapshot. What works on your site depends on your credentials, your Ghost version and its feature flags. Routes and sources are listed in [GHOST_API.list](GHOST_API.list).
 
 ![Demo: Claude Code creates a draft post in Ghost through the MCP server](https://raw.githubusercontent.com/proars/ghost-mcp-server/main/docs/demo.gif)
 
@@ -60,14 +60,13 @@ Check the connection with `claude mcp get ghost`, which should report `Connected
 
 Any other stdio MCP client can run the same command, `npx -y @proars/ghost-mcp-server`, with the two environment variables.
 
-**Updating:** `npx` uses a cache, so `@latest` may not be checked against the registry on every start. To force a registry freshness check whenever the command runs, use `npx --prefer-online -y @proars/ghost-mcp-server@latest`. In a JSON client configuration, put each part in its own `args` entry:
+**Updating:** `npx` uses a cache, so `@latest` may not be checked against the registry on every start. To force a registry freshness check whenever the command runs, use `npx --prefer-online -y @proars/ghost-mcp-server@latest`. In a JSON client configuration, set `args` to:
 
 ```json
-"command": "npx",
-"args": ["--prefer-online", "-y", "@proars/ghost-mcp-server@latest"]
+["--prefer-online", "-y", "@proars/ghost-mcp-server@latest"]
 ```
 
-To stay on one version, pin it, for example `@proars/ghost-mcp-server@2.1.1`. See the [changelog](CHANGELOG.md) for what changed in each release.
+To stay on one version, pin it, for example `@proars/ghost-mcp-server@2.2.0`. See the [changelog](CHANGELOG.md) for what changed in each release.
 
 Don't run `npx` from inside a clone of this repository: npm finds the local `package.json` with the same name and fails with `ghost-mcp-server: command not found`. Run it from any other folder.
 
@@ -114,7 +113,7 @@ The `.env` file in the project root is read regardless of the directory the clie
 | Images and themes | `upload_image`, `upload_theme`, `activate_theme` |
 | Webhooks | `create_webhook`, `update_webhook`, `delete_webhook` |
 | Site | `get_site`, `get_settings` |
-| Shortcuts | `update_post_seo`, `update_post_tags` |
+| Shortcuts | `update_post_seo`, `update_page_seo`, `update_post_tags` |
 | Discovery and generic calls | `ghost_list_endpoints`, `ghost_api_request` |
 
 Ghost has no delete endpoint for tiers, newsletters or offers, so those resources have no `delete_*` tool.
@@ -123,8 +122,9 @@ Ghost has no delete endpoint for tiers, newsletters or offers, so those resource
 
 ### How do I call the tools?
 
-- **Create and update:** put the record fields in `data` and pass the record `id` as a separate argument. Post and page updates need `data.updated_at` from a fresh read. The SEO and tag shortcuts take `updated_at` directly.
+- **Create and update:** put the record fields in `data` and pass the record `id` as a separate argument. Post and page updates need `data.updated_at` from a fresh read. The SEO shortcuts (`update_post_seo`, `update_page_seo`) and the tag shortcut take `updated_at` directly.
 - **Lists:** use `limit`, `page`, `filter`, `order`, `include` and `fields`. Posts and pages come back with compact fields and tags by default. Single-record reads return the full record.
+- **SEO:** `update_post_seo` and `update_page_seo` set `meta_title`, `meta_description`, `og_title` and `og_description` in one call. Pass `id`, the current `updated_at` and at least one of those fields. Fields you leave out stay unchanged.
 - **Tags:** setting tags replaces the whole set. Tags that don't exist yet are created, and an empty array removes all tags.
 - **Publishing:** call `update_post` with `data.status="published"`, or with `"scheduled"` and a future `data.published_at`. To send the post by email, add `newsletter` (a slug) and, optionally, `email_segment`.
 - **Images:** `upload_image` takes `file_path`, an optional `purpose` (`image`, `profile_image` or `icon`) and `ref`.

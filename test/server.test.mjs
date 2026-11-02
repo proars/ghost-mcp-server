@@ -61,13 +61,13 @@ async function allEndpoints() {
 test("tools: unique names, valid schemas, annotations", () => {
   const names = tools.map((tool) => tool.name);
   assert.equal(new Set(names).size, names.length);
-  assert.equal(tools.length, 59);
+  assert.equal(tools.length, 60);
   for (const tool of tools) {
     assert.equal(tool.inputSchema.type, "object", tool.name);
     assert.equal(typeof tool.description, "string", tool.name);
     assert.equal(typeof tool.annotations.readOnlyHint, "boolean", tool.name);
   }
-  for (const name of ["ghost_api_request", "ghost_list_endpoints", "update_post_seo", "update_post_tags"]) {
+  for (const name of ["ghost_api_request", "ghost_list_endpoints", "update_post_seo", "update_page_seo", "update_post_tags"]) {
     assert.ok(toolByName(name), name);
   }
   assert.ok(tools.filter((tool) => tool.name.startsWith("delete_")).every((tool) => tool.annotations.destructiveHint));
@@ -185,6 +185,7 @@ test("path parameters are encoded and dot segments are refused", async () => {
   for (const id of ["..", "."]) {
     assert.equal((await server.call("get_post", { id })).isError, true, id);
     assert.equal((await server.call("update_post_seo", { id, updated_at: "u", meta_title: "t" })).isError, true, id);
+    assert.equal((await server.call("update_page_seo", { id, updated_at: "u", meta_title: "t" })).isError, true, id);
   }
   assert.equal(mock.requests.length, count);
 });
@@ -229,6 +230,22 @@ test("update_post_seo and update_post_tags validate and send the right body", as
   const tagged = await server.call("update_post_tags", { id: "p1", updated_at: "u", tags: [" SEO ", "SEO", "Ghost"] });
   assert.deepEqual(JSON.parse(mock.last().body).posts[0].tags, [{ name: "SEO" }, { name: "Ghost" }]);
   assert.deepEqual(tagged.json.tags, ["SEO", "Ghost"]);
+});
+
+test("update_page_seo validates and sends the right body to the pages route", async () => {
+  mock.reply({ json: { pages: [{ id: "g1", updated_at: "new", meta_description: "D" }] } });
+  const seo = await server.call("update_page_seo", { id: "g1", updated_at: "u", meta_description: "D", og_description: "OD" });
+  assert.equal(seo.isError, false);
+  assert.deepEqual(seo.json, { id: "g1", updated_at: "new", meta_description: "D" });
+  const sent = mock.last();
+  assert.equal(sent.method, "PUT");
+  assert.equal(sent.pathname, `${API}/pages/g1/`);
+  assert.deepEqual(JSON.parse(sent.body), { pages: [{ updated_at: "u", meta_description: "D", og_description: "OD" }] });
+
+  const count = mock.requests.length;
+  assert.equal((await server.call("update_page_seo", { id: "g1", updated_at: "u" })).isError, true);
+  assert.equal((await server.call("update_page_seo", { id: "g1", updated_at: "u", meta_title: 5 })).isError, true);
+  assert.equal(mock.requests.length, count);
 });
 
 test("responses: 204 has no body, Ghost errors are readable, hints explain access", async () => {
@@ -446,7 +463,7 @@ test("large responses are truncated with a hint", async () => {
 test("unknown tools are an error and stdout carries only protocol messages", async () => {
   assert.equal((await server.call("nope")).isError, true);
   assert.equal(server.stdoutNoise(), "");
-  assert.match(server.stderr(), /running on stdio with 59 tools/);
+  assert.match(server.stderr(), /running on stdio with 60 tools/);
 });
 
 test("server version matches package.json", async () => {
@@ -546,7 +563,7 @@ test("annotations describe the real effect of every tool", () => {
       assert.equal(tool.annotations.destructiveHint, true, tool.name);
     }
   }
-  for (const name of ["update_post", "update_page", "update_post_seo", "update_post_tags", "activate_theme", "upload_theme"]) {
+  for (const name of ["update_post", "update_page", "update_post_seo", "update_page_seo", "update_post_tags", "activate_theme", "upload_theme"]) {
     assert.equal(toolByName(name).annotations.destructiveHint, true, name);
   }
 });

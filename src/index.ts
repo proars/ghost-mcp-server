@@ -19,7 +19,7 @@ import { accessNote, filterRoutes, hintFor, matchRoute, routeKey, ROUTES, type R
 
 type Args = Record<string, unknown>;
 
-const SERVER_VERSION = "2.1.1";
+const SERVER_VERSION = "2.2.0";
 const MAX_RESULT_CHARS = 100_000;
 
 /** Calls Ghost and, on 401, 403 and 404, adds what the route catalog knows about the failure. */
@@ -510,62 +510,67 @@ const STANDALONE_SPECS: ToolSpec[] = [
 
 const SEO_FIELDS = ["meta_title", "meta_description", "og_title", "og_description"];
 
-const seoTool: ToolDef = {
-  name: "update_post_seo",
-  description:
-    "Shortcut to update SEO fields of a post (meta_title, meta_description, og_title, og_description). Requires id and the current updated_at. At least one SEO field must be provided. [PUT /admin/posts/{id}/]",
-  inputSchema: {
-    type: "object",
-    properties: {
-      id: { type: "string", description: "Post id." },
-      updated_at: {
-        type: "string",
-        description: "Current updated_at value of the post, as returned by get_posts.",
+function seoToolFor(kind: "post" | "page"): ToolDef {
+  const path = `${kind}s`;
+  return {
+    name: `update_${kind}_seo`,
+    description: `Shortcut to update SEO fields of a ${kind} (meta_title, meta_description, og_title, og_description). Requires id and the current updated_at. At least one SEO field must be provided. [PUT /admin/${path}/{id}/]`,
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: `${kind === "post" ? "Post" : "Page"} id.` },
+        updated_at: {
+          type: "string",
+          description: `Current updated_at value of the ${kind}, as returned by get_${path}.`,
+        },
+        meta_title: { type: "string", description: "SEO meta title." },
+        meta_description: { type: "string", description: "SEO meta description." },
+        og_title: { type: "string", description: "Open Graph title." },
+        og_description: { type: "string", description: "Open Graph description." },
       },
-      meta_title: { type: "string", description: "SEO meta title." },
-      meta_description: { type: "string", description: "SEO meta description." },
-      og_title: { type: "string", description: "Open Graph title." },
-      og_description: { type: "string", description: "Open Graph description." },
+      required: ["id", "updated_at"],
     },
-    required: ["id", "updated_at"],
-  },
-  // Both overwrite existing values (SEO fields, or the whole tag list), so they are destructive.
-  annotations: { readOnlyHint: false, destructiveHint: true },
-  isMutation: () => true,
-  run: async (args) => {
-    const id = requireString(args, "id");
-    const updated_at = requireString(args, "updated_at");
-    const fields: Record<string, string> = {};
-    for (const key of SEO_FIELDS) {
-      const value = args[key];
-      if (value !== undefined) {
-        if (typeof value !== "string") {
-          throw new Error(`Argument "${key}" must be a string.`);
+    // Both overwrite existing values (SEO fields, or the whole tag list), so they are destructive.
+    annotations: { readOnlyHint: false, destructiveHint: true },
+    isMutation: () => true,
+    run: async (args) => {
+      const id = requireString(args, "id");
+      const updated_at = requireString(args, "updated_at");
+      const fields: Record<string, string> = {};
+      for (const key of SEO_FIELDS) {
+        const value = args[key];
+        if (value !== undefined) {
+          if (typeof value !== "string") {
+            throw new Error(`Argument "${key}" must be a string.`);
+          }
+          fields[key] = value;
         }
-        fields[key] = value;
       }
-    }
-    if (Object.keys(fields).length === 0) {
-      throw new Error(`Provide at least one of: ${SEO_FIELDS.join(", ")}.`);
-    }
-    assertSafeSegment("id", id);
-    const result: any = await request(
-      "PUT",
-      `/posts/${encodeURIComponent(id)}/`,
-      {},
-      { posts: [{ updated_at, ...fields }] }
-    );
-    const post = result.posts?.[0] ?? {};
-    return {
-      id: post.id,
-      updated_at: post.updated_at,
-      meta_title: post.meta_title,
-      meta_description: post.meta_description,
-      og_title: post.og_title,
-      og_description: post.og_description,
-    };
-  },
-};
+      if (Object.keys(fields).length === 0) {
+        throw new Error(`Provide at least one of: ${SEO_FIELDS.join(", ")}.`);
+      }
+      assertSafeSegment("id", id);
+      const result: any = await request(
+        "PUT",
+        `/${path}/${encodeURIComponent(id)}/`,
+        {},
+        { [path]: [{ updated_at, ...fields }] }
+      );
+      const record = result[path]?.[0] ?? {};
+      return {
+        id: record.id,
+        updated_at: record.updated_at,
+        meta_title: record.meta_title,
+        meta_description: record.meta_description,
+        og_title: record.og_title,
+        og_description: record.og_description,
+      };
+    },
+  };
+}
+
+const seoTool = seoToolFor("post");
+const pageSeoTool = seoToolFor("page");
 
 const tagsTool: ToolDef = {
   name: "update_post_tags",
@@ -799,6 +804,7 @@ const TOOLS: ToolDef[] = [
   ...RESOURCES.flatMap(specsForResource).map(toolFromSpec),
   ...STANDALONE_SPECS.map(toolFromSpec),
   seoTool,
+  pageSeoTool,
   tagsTool,
   endpointsTool,
   rawTool,
