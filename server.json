@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.proars/ghost-mcp-server",
+  "description": "MCP server for Ghost CMS: manage posts, pages, tags, SEO, members and newsletters via the Admin API.",
+  "repository": {
+    "url": "https://github.com/proars/ghost-mcp-server",
+    "source": "github"
+  },
+  "version": "2.2.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@proars/ghost-mcp-server",
+      "version": "2.2.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GHOST_API_URL",
+          "description": "Ghost Admin domain, for example https://your-blog.com",
+          "isRequired": true,
+          "format": "string"
+        },
+        {
+          "name": "GHOST_ADMIN_API_KEY",
+          "description": "Ghost Admin API key (id:secret)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

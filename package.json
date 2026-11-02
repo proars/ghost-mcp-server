@@ -1,6 +1,7 @@
 {
   "name": "@proars/ghost-mcp-server",
-  "version": "2.2.0",
+  "version": "2.2.1",
+  "mcpName": "io.github.proars/ghost-mcp-server",
   "description": "MCP server for Ghost CMS: manage posts, pages, tags, SEO metadata, members, newsletters and themes through the Ghost Admin API from Claude, Cursor and other AI agents",
   "main": "dist/index.js",
   "bin": {
@@ -34,13 +35,20 @@
   "keywords": [
     "ghost",
     "ghost-cms",
+    "ghost-mcp-server",
+    "ghost-cms-mcp",
+    "ghost-admin-api-mcp",
+    "ghost-api",
     "mcp",
     "mcp-server",
     "model-context-protocol",
     "claude",
+    "claude-code",
+    "claude-desktop",
     "cursor",
     "ai-agents",
     "ghost-admin-api",
+    "typescript",
     "seo"
   ],
   "license": "MIT",

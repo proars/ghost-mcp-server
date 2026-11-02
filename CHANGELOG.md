@@ -4,6 +4,12 @@ All notable changes to this project are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-11-02
+
+### Added
+
+- `mcpName` in `package.json` and a `server.json` file, so the server can be listed in the official MCP Registry.
+
 ## [2.2.0] - 2026-11-02
 
 ### Added
