@@ -11,6 +11,8 @@ Ghost MCP Server is an open-source [Model Context Protocol](https://modelcontext
 
 It exposes **59 tools**: 55 dedicated API tools, two shortcuts for SEO and tags, a route search and a generic request tool. The built-in catalog covers **253 Admin API routes** taken from a pinned Ghost source snapshot. What works on your site depends on your credentials, your Ghost version and its feature flags. Routes and sources are listed in [GHOST_API.list](GHOST_API.list).
 
+![Demo: Claude Code creates a draft post in Ghost through the MCP server](https://raw.githubusercontent.com/proars/ghost-mcp-server/main/docs/demo.gif)
+
 ## Quick start
 
 You need Node.js 20 or newer and a Ghost site with Admin API access.
