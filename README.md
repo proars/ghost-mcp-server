@@ -45,11 +45,19 @@ Config file locations: Claude Desktop on macOS uses `~/Library/Application Suppo
 **Claude Code:**
 
 ```bash
-claude mcp add ghost \
+claude mcp add ghost --scope user \
   -e GHOST_API_URL=https://your-blog.com \
   -e GHOST_ADMIN_API_KEY=64f1a2b3c4d5e6f7a8b9c0d1:3e5f7a9b1c2d4e6f8a0b2c4d6e8f0a1b3c5d7e9f1a2b4c6d8e0f2a3b5c7d9e1f \
   -- npx -y @proars/ghost-mcp-server
 ```
+
+`--scope user` makes the server available in every folder. Without it, the server is registered only for the folder where you ran the command. Claude Code starts and stops the server itself, so you don't need to keep a terminal open.
+
+Check the connection with `claude mcp get ghost`, which should report `Connected`, or type `/mcp` inside a `claude` session. To remove the server, run `claude mcp remove ghost -s user`.
+
+**Updating:** `npx` keeps a cached copy and may not fetch a new release right away. To update, run `rm -rf ~/.npm/_npx` and restart your client, or use `@proars/ghost-mcp-server@latest` in the command so npx checks the registry on every start. To stay on one version, pin it, for example `@proars/ghost-mcp-server@2.1.0`. See the [changelog](CHANGELOG.md) for what changed in each release.
+
+Don't run `npx` from inside a clone of this repository: npm finds the local `package.json` with the same name and fails with `ghost-mcp-server: command not found`. Run it from any other folder.
 
 Any other stdio MCP client can run the same command, `npx -y @proars/ghost-mcp-server`, with the two environment variables.
 

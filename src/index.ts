@@ -19,7 +19,7 @@ import { accessNote, filterRoutes, hintFor, matchRoute, routeKey, ROUTES, type R
 
 type Args = Record<string, unknown>;
 
-const SERVER_VERSION = "2.1.0";
+const SERVER_VERSION = "2.1.1";
 const MAX_RESULT_CHARS = 100_000;
 
 /** Calls Ghost and, on 401, 403 and 404, adds what the route catalog knows about the failure. */

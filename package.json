@@ -1,6 +1,6 @@
 {
   "name": "@proars/ghost-mcp-server",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "MCP server for Ghost CMS: manage posts, pages, tags, SEO metadata, members, newsletters and themes through the Ghost Admin API from Claude, Cursor and other AI agents",
   "main": "dist/index.js",
   "bin": {
@@ -10,6 +10,7 @@
     "dist",
     "README.md",
     "LICENSE",
+    "CHANGELOG.md",
     ".env.example"
   ],
   "type": "module",
